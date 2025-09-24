@@ -1,4 +1,4 @@
-# 💊 Open Access Medicine Development (Decentralized Pharma)
+Open Access Medicine Development (Decentralized Pharma)
 
 ## 🎯 Overview
 
@@ -10,6 +10,7 @@ A blockchain-based decentralized autonomous organization (DAO) for crowdfunded p
 - **🔬 Tokenized IP Ownership**: Contributors receive IP tokens proportional to their funding contributions
 - **🗳️ DAO Governance**: Decentralized decision-making through token-weighted voting
 - **📊 Clinical Trial Transparency**: Immutable storage of clinical trial data and results
+- **⭐ Project Ratings**: Contributors can rate completed projects to build reputation and guide future funding
 - **⚡ Emergency Controls**: Project creators can pause projects if needed
 
 ## 📋 Smart Contract Functions
@@ -57,6 +58,12 @@ A blockchain-based decentralized autonomous organization (DAO) for crowdfunded p
 (contract-call? .contract vote-on-proposal u1 true)
 ```
 
+### Rating Projects
+
+```clarity
+(contract-call? .contract rate-project u1 u5)
+```
+
 ## 📖 Usage Instructions
 
 ### 🏗️ For Project Creators
@@ -72,6 +79,7 @@ A blockchain-based decentralized autonomous organization (DAO) for crowdfunded p
 2. **Contribute Funds**: Support promising research with STX tokens
 3. **Receive IP Tokens**: Gain proportional ownership rights in research IP
 4. **Participate in Governance**: Vote on proposals using IP token weight
+5. **Rate Projects**: Provide feedback on completed research to help improve the ecosystem
 
 ### 🔬 For Researchers
 
@@ -99,6 +107,7 @@ A blockchain-based decentralized autonomous organization (DAO) for crowdfunded p
 - **Milestone Completion**: Visual progress indicators
 - **IP Ownership**: Transparent calculation of ownership percentages
 - **Clinical Success Rates**: Historical data for evidence-based decisions
+- **Project Ratings**: Community-driven assessment of research quality and outcomes
 
 ## 🛠️ Development Setup
 

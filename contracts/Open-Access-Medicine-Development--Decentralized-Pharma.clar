@@ -21,6 +21,8 @@
     milestone-count: uint,
     completed-milestones: uint,
     ip-token-supply: uint,
+    total-rating-sum: uint,
+    rating-count: uint,
     active: bool
   }
 )
@@ -89,6 +91,8 @@
         milestone-count: u0,
         completed-milestones: u0,
         ip-token-supply: (* target-funding u100),
+        total-rating-sum: u0,
+        rating-count: u0,
         active: true
       }
     )
@@ -331,5 +335,31 @@
     )
     
     (ok true)
+  )
+)
+
+(define-public (rate-project (project-id uint) (rating uint))
+  (let ((project (unwrap! (map-get? research-projects { project-id: project-id }) ERR-PROJECT-NOT-FOUND))
+        (funder-data (unwrap! (map-get? project-funders { project-id: project-id, funder: tx-sender }) ERR-UNAUTHORIZED)))
+    (asserts! (and (>= rating u1) (<= rating u5)) ERR-INVALID-MILESTONE)
+    (asserts! (> (get amount-contributed funder-data) u0) ERR-UNAUTHORIZED)
+    (asserts! (not (get active project)) ERR-PROJECT-NOT-FOUND)
+    (map-set research-projects
+      { project-id: project-id }
+      (merge project {
+        total-rating-sum: (+ (get total-rating-sum project) rating),
+        rating-count: (+ (get rating-count project) u1)
+      })
+    )
+    (ok true)
+  )
+)
+
+(define-read-only (get-project-average-rating (project-id uint))
+  (let ((project (unwrap! (map-get? research-projects { project-id: project-id }) (err u0))))
+    (if (> (get rating-count project) u0)
+      (ok (/ (* (get total-rating-sum project) u100) (get rating-count project)))
+      (err u0)
+    )
   )
 )
