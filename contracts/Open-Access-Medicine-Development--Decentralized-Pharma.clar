@@ -355,6 +355,23 @@
   )
 )
 
+(define-public (transfer-ip-tokens (project-id uint) (recipient principal) (amount uint))
+  (let ((sender-data (unwrap! (map-get? project-funders { project-id: project-id, funder: tx-sender }) ERR-UNAUTHORIZED))
+        (recipient-data (default-to { amount-contributed: u0, ip-tokens-owned: u0 } (map-get? project-funders { project-id: project-id, funder: recipient }))))
+    (asserts! (>= (get ip-tokens-owned sender-data) amount) ERR-INSUFFICIENT-FUNDS)
+    (asserts! (not (is-eq tx-sender recipient)) ERR-INVALID-MILESTONE)
+    (map-set project-funders
+      { project-id: project-id, funder: tx-sender }
+      (merge sender-data { ip-tokens-owned: (- (get ip-tokens-owned sender-data) amount) })
+    )
+    (map-set project-funders
+      { project-id: project-id, funder: recipient }
+      (merge recipient-data { ip-tokens-owned: (+ (get ip-tokens-owned recipient-data) amount) })
+    )
+    (ok true)
+  )
+)
+
 (define-read-only (get-project-average-rating (project-id uint))
   (let ((project (unwrap! (map-get? research-projects { project-id: project-id }) (err u0))))
     (if (> (get rating-count project) u0)

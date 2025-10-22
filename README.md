@@ -132,4 +132,18 @@ We welcome contributions to advance open access medicine development. Please sub
 
 ---
 
+## 🔄 IP Token Transfers
+
+- **💸 Token Liquidity**: Funders can transfer IP tokens to other principals, enabling secondary market trading
+- **🗳️ Voting Power Preservation**: Transferred tokens retain their governance voting rights
+- **📈 Investment Flexibility**: Allows for portfolio optimization and strategic IP ownership adjustments
+
+### Transferring IP Tokens
+
+```clarity
+(contract-call? .contract transfer-ip-tokens u1 'SP2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKNRV9EJ7 u1000)
+```
+
+---
+
 *Building the future of decentralized pharmaceutical research, one milestone at a time* 🌟
