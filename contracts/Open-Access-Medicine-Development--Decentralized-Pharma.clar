@@ -68,8 +68,16 @@
     participant-count: uint,
     success-rate: uint,
     timestamp: uint,
-    verified: bool
+    verified: bool,
+    votes-for: uint,
+    votes-against: uint,
+    voting-deadline: uint
   }
+)
+
+(define-map clinical-data-votes
+  { project-id: uint, trial-phase: uint, voter: principal }
+  { vote: bool, voting-power: uint }
 )
 
 (define-public (create-research-project 
@@ -183,17 +191,18 @@
   )
 )
 
-(define-public (submit-clinical-data 
+(define-public (submit-clinical-data
   (project-id uint)
   (trial-phase uint)
   (data-hash (buff 32))
   (participant-count uint)
-  (success-rate uint))
+  (success-rate uint)
+  (voting-period uint))
   (let ((project (unwrap! (map-get? research-projects { project-id: project-id }) ERR-PROJECT-NOT-FOUND)))
-    
+
     (asserts! (is-eq tx-sender (get creator project)) ERR-UNAUTHORIZED)
     (asserts! (<= success-rate u100) ERR-INVALID-MILESTONE)
-    
+
     (map-set clinical-trial-data
       { project-id: project-id, trial-phase: trial-phase }
       {
@@ -201,10 +210,13 @@
         participant-count: participant-count,
         success-rate: success-rate,
         timestamp: stacks-block-height,
-        verified: false
+        verified: false,
+        votes-for: u0,
+        votes-against: u0,
+        voting-deadline: (+ stacks-block-height voting-period)
       }
     )
-    
+
     (ok true)
   )
 )
@@ -265,14 +277,47 @@
   )
 )
 
-(define-public (verify-clinical-data (project-id uint) (trial-phase uint))
-  (let ((trial-data (unwrap! (map-get? clinical-trial-data { project-id: project-id, trial-phase: trial-phase }) ERR-PROJECT-NOT-FOUND)))
-    
-    (map-set clinical-trial-data
-      { project-id: project-id, trial-phase: trial-phase }
-      (merge trial-data { verified: true })
+(define-public (vote-on-clinical-data (project-id uint) (trial-phase uint) (vote bool))
+  (let ((trial-data (unwrap! (map-get? clinical-trial-data { project-id: project-id, trial-phase: trial-phase }) ERR-PROJECT-NOT-FOUND))
+        (voter-stake (default-to { amount-contributed: u0, ip-tokens-owned: u0 }
+                                 (map-get? project-funders { project-id: project-id, funder: tx-sender })))
+        (voting-power (get ip-tokens-owned voter-stake)))
+
+    (asserts! (> voting-power u0) ERR-UNAUTHORIZED)
+    (asserts! (< stacks-block-height (get voting-deadline trial-data)) ERR-VOTING-PERIOD-ENDED)
+    (asserts! (is-none (map-get? clinical-data-votes { project-id: project-id, trial-phase: trial-phase, voter: tx-sender })) ERR-ALREADY-VOTED)
+
+    (map-set clinical-data-votes
+      { project-id: project-id, trial-phase: trial-phase, voter: tx-sender }
+      { vote: vote, voting-power: voting-power }
     )
-    
+
+    (if vote
+      (map-set clinical-trial-data
+        { project-id: project-id, trial-phase: trial-phase }
+        (merge trial-data { votes-for: (+ (get votes-for trial-data) voting-power) }))
+      (map-set clinical-trial-data
+        { project-id: project-id, trial-phase: trial-phase }
+        (merge trial-data { votes-against: (+ (get votes-against trial-data) voting-power) }))
+    )
+
+    (ok true)
+  )
+)
+
+(define-public (finalize-clinical-data-verification (project-id uint) (trial-phase uint))
+  (let ((trial-data (unwrap! (map-get? clinical-trial-data { project-id: project-id, trial-phase: trial-phase }) ERR-PROJECT-NOT-FOUND)))
+
+    (asserts! (>= stacks-block-height (get voting-deadline trial-data)) ERR-VOTING-PERIOD-ENDED)
+    (asserts! (> (+ (get votes-for trial-data) (get votes-against trial-data)) u0) ERR-INVALID-MILESTONE)
+
+    (if (> (get votes-for trial-data) (get votes-against trial-data))
+      (map-set clinical-trial-data
+        { project-id: project-id, trial-phase: trial-phase }
+        (merge trial-data { verified: true }))
+      false
+    )
+
     (ok true)
   )
 )

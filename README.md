@@ -10,6 +10,7 @@ A blockchain-based decentralized autonomous organization (DAO) for crowdfunded p
 - **🔬 Tokenized IP Ownership**: Contributors receive IP tokens proportional to their funding contributions
 - **🗳️ DAO Governance**: Decentralized decision-making through token-weighted voting
 - **📊 Clinical Trial Transparency**: Immutable storage of clinical trial data and results
+- **🗳️ Clinical Data Verification Voting**: Community voting on clinical trial data authenticity and validity
 - **⭐ Project Ratings**: Contributors can rate completed projects to build reputation and guide future funding
 - **⚡ Emergency Controls**: Project creators can pause projects if needed
 
@@ -41,8 +42,20 @@ A blockchain-based decentralized autonomous organization (DAO) for crowdfunded p
 ### Submitting Clinical Data
 
 ```clarity
-(contract-call? .contract submit-clinical-data 
-  u1 u1 0x1234... u100 u85)
+(contract-call? .contract submit-clinical-data
+  u1 u1 0x1234... u100 u85 u144)
+```
+
+### Voting on Clinical Data Verification
+
+```clarity
+(contract-call? .contract vote-on-clinical-data u1 u1 true)
+```
+
+### Finalizing Clinical Data Verification
+
+```clarity
+(contract-call? .contract finalize-clinical-data-verification u1 u1)
 ```
 
 ### Creating Governance Proposals
@@ -79,7 +92,8 @@ A blockchain-based decentralized autonomous organization (DAO) for crowdfunded p
 2. **Contribute Funds**: Support promising research with STX tokens
 3. **Receive IP Tokens**: Gain proportional ownership rights in research IP
 4. **Participate in Governance**: Vote on proposals using IP token weight
-5. **Rate Projects**: Provide feedback on completed research to help improve the ecosystem
+5. **Verify Clinical Data**: Vote on the authenticity and validity of submitted clinical trial data
+6. **Rate Projects**: Provide feedback on completed research to help improve the ecosystem
 
 ### 🔬 For Researchers
 
@@ -107,6 +121,7 @@ A blockchain-based decentralized autonomous organization (DAO) for crowdfunded p
 - **Milestone Completion**: Visual progress indicators
 - **IP Ownership**: Transparent calculation of ownership percentages
 - **Clinical Success Rates**: Historical data for evidence-based decisions
+- **Clinical Data Verification**: Community consensus on data authenticity through voting
 - **Project Ratings**: Community-driven assessment of research quality and outcomes
 
 ## 🛠️ Development Setup
